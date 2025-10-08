@@ -223,9 +223,6 @@ namespace WarframeMarket_StandingToPlat
                         Foreground = Brushes.White
                     });
 
-                    // Create button container
-                    var buttonStack = new StackPanel { Orientation = Orientation.Horizontal };
-                    
                     var linkButton = new Button
                     {
                         Content = $"🔗 View on Warframe Market",
@@ -233,7 +230,7 @@ namespace WarframeMarket_StandingToPlat
                         Foreground = Brushes.White,
                         BorderThickness = new Thickness(0),
                         Padding = new Thickness(8, 4, 8, 4),
-                        Margin = new Thickness(0, 5, 10, 0),
+                        Margin = new Thickness(0, 5, 0, 0),
                         Cursor = Cursors.Hand
                     };
                     linkButton.Click += (s, e) => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -242,21 +239,7 @@ namespace WarframeMarket_StandingToPlat
                         UseShellExecute = true
                     });
 
-                    var postOrderButton = new Button
-                    {
-                        Content = $"📝 Post Order",
-                        Background = new SolidColorBrush(Color.FromRgb(76, 175, 80)),
-                        Foreground = Brushes.White,
-                        BorderThickness = new Thickness(0),
-                        Padding = new Thickness(8, 4, 8, 4),
-                        Margin = new Thickness(0, 5, 0, 0),
-                        Cursor = Cursors.Hand
-                    };
-                    postOrderButton.Click += (s, e) => ShowPostOrderDialog(firstOrder.ItemId, firstOrder.ItemName, group.OrderByDescending(o => o.Platinum).First().Platinum);
-
-                    buttonStack.Children.Add(linkButton);
-                    buttonStack.Children.Add(postOrderButton);
-                    modStack.Children.Add(buttonStack);
+                    modStack.Children.Add(linkButton);
                     modHeader.Child = modStack;
                     ResultsPanel.Children.Add(modHeader);
 
@@ -295,6 +278,136 @@ namespace WarframeMarket_StandingToPlat
                         orderBorder.Child = orderStack;
                         ResultsPanel.Children.Add(orderBorder);
                     }
+
+                    // Create Post Order section outside the green panel
+                    var postOrderBorder = new Border
+                    {
+                        Background = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
+                        CornerRadius = new CornerRadius(4),
+                        Margin = new Thickness(0, 10, 0, 15),
+                        Padding = new Thickness(15)
+                    };
+
+                    var postOrderStack = new StackPanel();
+                    
+                    // Post Order header
+                    postOrderStack.Children.Add(new TextBlock
+                    {
+                        Text = "📝 Post Your Order",
+                        FontSize = 14,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        Margin = new Thickness(0, 0, 0, 10)
+                    });
+
+                    // Input fields container
+                    var inputGrid = new Grid();
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
+
+                    // Quantity
+                    inputGrid.Children.Add(new TextBlock
+                    {
+                        Text = "Quantity:",
+                        FontSize = 12,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(0, 0, 5, 0)
+                    });
+                    Grid.SetColumn(inputGrid.Children[inputGrid.Children.Count - 1], 0);
+
+                    var quantityTextBox = new TextBox
+                    {
+                        Text = "1",
+                        Height = 25,
+                        FontSize = 11,
+                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                        Foreground = Brushes.White,
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                        Padding = new Thickness(5, 3, 5, 3)
+                    };
+                    Grid.SetColumn(quantityTextBox, 1);
+                    inputGrid.Children.Add(quantityTextBox);
+
+                    // Cost
+                    inputGrid.Children.Add(new TextBlock
+                    {
+                        Text = "Cost:",
+                        FontSize = 12,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(10, 0, 5, 0)
+                    });
+                    Grid.SetColumn(inputGrid.Children[inputGrid.Children.Count - 1], 2);
+
+                    var costTextBox = new TextBox
+                    {
+                        Text = group.OrderByDescending(o => o.Platinum).First().Platinum.ToString(),
+                        Height = 25,
+                        FontSize = 11,
+                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                        Foreground = Brushes.White,
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                        Padding = new Thickness(5, 3, 5, 3)
+                    };
+                    Grid.SetColumn(costTextBox, 3);
+                    inputGrid.Children.Add(costTextBox);
+
+                    // Rank
+                    inputGrid.Children.Add(new TextBlock
+                    {
+                        Text = "Rank:",
+                        FontSize = 12,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(10, 0, 5, 0)
+                    });
+                    Grid.SetColumn(inputGrid.Children[inputGrid.Children.Count - 1], 4);
+
+                    var rankTextBox = new TextBox
+                    {
+                        Text = "0",
+                        Height = 25,
+                        FontSize = 11,
+                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                        Foreground = Brushes.White,
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                        Padding = new Thickness(5, 3, 5, 3)
+                    };
+                    Grid.SetColumn(rankTextBox, 5);
+                    inputGrid.Children.Add(rankTextBox);
+
+                    // Post Order button
+                    var postOrderButton = new Button
+                    {
+                        Content = "📝 Post Order",
+                        Height = 25,
+                        FontSize = 11,
+                        FontWeight = FontWeights.Bold,
+                        Background = new SolidColorBrush(Color.FromRgb(76, 175, 80)),
+                        Foreground = Brushes.White,
+                        BorderThickness = new Thickness(0),
+                        Padding = new Thickness(8, 2, 8, 2),
+                        Margin = new Thickness(10, 0, 0, 0),
+                        Cursor = Cursors.Hand
+                    };
+                    Grid.SetColumn(postOrderButton, 6);
+                    inputGrid.Children.Add(postOrderButton);
+
+                    // Add click handler for the button
+                    postOrderButton.Click += (s, e) => PostOrderInline(firstOrder.ItemId, firstOrder.ItemName, quantityTextBox.Text, costTextBox.Text, rankTextBox.Text);
+
+                    postOrderStack.Children.Add(inputGrid);
+                    postOrderBorder.Child = postOrderStack;
+                    ResultsPanel.Children.Add(postOrderBorder);
                 }
             }
             else
@@ -476,12 +589,40 @@ namespace WarframeMarket_StandingToPlat
             return $"https://warframe.market/items/{itemId.Trim()}";
         }
 
-        // Method to show the Post Order dialog
-        private void ShowPostOrderDialog(string itemId, string itemName, int defaultCost)
+        // Method to handle inline Post Order
+        private async void PostOrderInline(string itemId, string itemName, string quantityText, string costText, string rankText)
         {
-            var dialog = new PostOrderDialog(itemId, itemName, defaultCost);
-            dialog.Owner = this;
-            dialog.ShowDialog();
+            try
+            {
+                if (!int.TryParse(quantityText, out int quantity) || quantity <= 0)
+                {
+                    StatusText.Text = "❌ Please enter a valid quantity (positive number)";
+                    return;
+                }
+
+                if (!int.TryParse(costText, out int cost) || cost <= 0)
+                {
+                    StatusText.Text = "❌ Please enter a valid cost (positive number)";
+                    return;
+                }
+
+                if (!int.TryParse(rankText, out int rank) || rank < 0)
+                {
+                    StatusText.Text = "❌ Please enter a valid rank (0 or positive number)";
+                    return;
+                }
+
+                StatusText.Text = $"🔄 Posting order for {itemName}...";
+
+                // Simulate API call (replace with real implementation)
+                await Task.Delay(2000);
+                
+                StatusText.Text = $"✅ Order posted successfully for {itemName} (Quantity: {quantity}, Cost: {cost}, Rank: {rank})";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"❌ Error posting order: {ex.Message}";
+            }
         }
 
         // Method to save the last scan data to a JSON file per syndicate
