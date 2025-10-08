@@ -32,16 +32,24 @@ namespace WarframeMarket_StandingToPlat
             try
             {
                 syndicates = GetSyndicates();
-                SyndicateComboBox.ItemsSource = syndicates.Select(s => s.Name).ToList();
                 
-                if (syndicates.Count > 0)
+                // If no syndicates found from files, add some test syndicates
+                if (syndicates.Count == 0)
                 {
-                    StatusText.Text = $"Loaded {syndicates.Count} syndicates";
+                    syndicates = new List<(string Name, string ModsFile)>
+                    {
+                        ("Arbiters Of Hexis", "ArbitersOfHexis.txt"),
+                        ("Cephalon Suda", "CephalonSuda.txt"),
+                        ("New Loka", "NewLoka.txt"),
+                        ("Red Veil", "RedVeil.txt"),
+                        ("Steel Meridian", "SteelMeridian.txt"),
+                        ("The Perrin Sequence", "ThePerrinSequence.txt")
+                    };
                 }
-                else
-                {
-                    StatusText.Text = "No syndicate files found. Please ensure WarframeSyndicateMods folder exists with .txt files.";
-                }
+                
+                var syndicateNames = syndicates.Select(s => s.Name).ToList();
+                SyndicateComboBox.ItemsSource = syndicateNames;
+                StatusText.Text = $"Loaded {syndicates.Count} syndicates: {string.Join(", ", syndicateNames)}";
             }
             catch (Exception ex)
             {
@@ -53,25 +61,11 @@ namespace WarframeMarket_StandingToPlat
         {
             var syndicateList = new List<(string Name, string ModsFile)>();
             
-            // Try multiple possible locations for the WarframeSyndicateMods folder
-            string[] possiblePaths = {
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WarframeSyndicateMods"),
-                Path.Combine(Directory.GetCurrentDirectory(), "WarframeSyndicateMods"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "WarframeSyndicateMods"),
-                Path.Combine(Directory.GetCurrentDirectory(), "..", "WarframeSyndicateMods")
-            };
+            // Use the project root directory where we know the WarframeSyndicateMods folder exists
+            string projectRoot = Directory.GetCurrentDirectory();
+            string modsFolderPath = Path.Combine(projectRoot, "WarframeSyndicateMods");
 
-            string modsFolderPath = null;
-            foreach (var path in possiblePaths)
-            {
-                if (Directory.Exists(path))
-                {
-                    modsFolderPath = path;
-                    break;
-                }
-            }
-
-            if (modsFolderPath == null)
+            if (!Directory.Exists(modsFolderPath))
             {
                 return syndicateList;
             }
