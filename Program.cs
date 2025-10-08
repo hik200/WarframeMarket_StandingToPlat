@@ -172,11 +172,28 @@ class Program
             Console.WriteLine("\n========================================");
             Console.WriteLine("ORDERS FETCHED SUCCESSFULLY:");
             Console.WriteLine("========================================");
-            foreach (var order in sortedOrders)
+            
+            // Group orders by item to show market links
+            var groupedOrders = sortedOrders.GroupBy(o => o.ItemId).ToList();
+            
+            foreach (var group in groupedOrders)
             {
-                Console.WriteLine($"/w {order.User.IngameName} Hi! I want to sell: \"{order.ItemName} (rank {order.Rank})\" for {order.Platinum} platinum. (warframe.market)");
+                var firstOrder = group.First();
+                var marketUrl = GetWarframeMarketUrl(firstOrder.ItemId);
+                
+                Console.WriteLine($"\n{firstOrder.ItemName}");
+                Console.WriteLine($"Market Link: {marketUrl}");
+                Console.WriteLine("---");
+                
+                foreach (var order in group)
+                {
+                    Console.WriteLine($"/w {order.User.IngameName} Hi! I want to sell: \"{order.ItemName} (rank {order.Rank})\" for {order.Platinum} platinum. (warframe.market)");
+                }
             }
-            Console.WriteLine($"\nTotal orders found: {orders.Count}");
+            
+            Console.WriteLine($"\n========================================");
+            Console.WriteLine($"Total orders found: {orders.Count}");
+            Console.WriteLine($"========================================");
         }
         else
         {
@@ -192,7 +209,9 @@ class Program
             Console.WriteLine("========================================");
             foreach (var mod in modsWithNoOrders)
             {
+                var marketUrl = GetWarframeMarketUrl(mod);
                 Console.WriteLine($"- {FormatItemName(mod)}");
+                Console.WriteLine($"  Link: {marketUrl}");
             }
             Console.WriteLine($"\nTotal mods without orders: {modsWithNoOrders.Count}");
         }
@@ -218,9 +237,23 @@ class Program
                 writer.WriteLine($"ORDERS FOUND ({orders.Count} total):");
                 writer.WriteLine($"========================================");
                 var sortedOrders = orders.OrderByDescending(order => order.Platinum).ToList();
-                foreach (var order in sortedOrders)
+                
+                // Group orders by item to show market links
+                var groupedOrders = sortedOrders.GroupBy(o => o.ItemId).ToList();
+                
+                foreach (var group in groupedOrders)
                 {
-                    writer.WriteLine($"/w {order.User.IngameName} Hi! I want to sell: \"{order.ItemName} (rank {order.Rank})\" for {order.Platinum} platinum. (warframe.market)");
+                    var firstOrder = group.First();
+                    var marketUrl = GetWarframeMarketUrl(firstOrder.ItemId);
+                    
+                    writer.WriteLine($"\n{firstOrder.ItemName}");
+                    writer.WriteLine($"Market Link: {marketUrl}");
+                    writer.WriteLine("---");
+                    
+                    foreach (var order in group)
+                    {
+                        writer.WriteLine($"/w {order.User.IngameName} Hi! I want to sell: \"{order.ItemName} (rank {order.Rank})\" for {order.Platinum} platinum. (warframe.market)");
+                    }
                 }
                 writer.WriteLine();
             }
@@ -235,7 +268,9 @@ class Program
                 writer.WriteLine($"========================================");
                 foreach (var mod in processedMods)
                 {
+                    var marketUrl = GetWarframeMarketUrl(mod);
                     writer.WriteLine($"- {FormatItemName(mod)}");
+                    writer.WriteLine($"  Link: {marketUrl}");
                 }
                 writer.WriteLine();
             }
@@ -246,7 +281,9 @@ class Program
                 writer.WriteLine($"========================================");
                 foreach (var mod in modsWithNoOrders)
                 {
+                    var marketUrl = GetWarframeMarketUrl(mod);
                     writer.WriteLine($"- {FormatItemName(mod)}");
+                    writer.WriteLine($"  Link: {marketUrl}");
                 }
                 writer.WriteLine();
             }
@@ -314,5 +351,11 @@ class Program
         }
 
         return string.Join(" ", words);
+    }
+
+    // Method to generate the Warframe Market URL for a given item
+    private static string GetWarframeMarketUrl(string itemId)
+    {
+        return $"https://warframe.market/items/{itemId.Trim()}";
     }
 }
