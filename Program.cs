@@ -123,10 +123,11 @@ class Program
                             order.Type == "sell" &&
                             order.User.Status == "ingame" &&
                             order.Rank == 0)
-                        .OrderBy(order => order.Platinum)
+                        .OrderByDescending(order => order.Platinum)
                         .Take(MAX_ORDERS_PER_MOD)
                         .Select(order =>
                         {
+                            order.ItemId = mod.Trim();  // Set ItemId from the text file
                             order.ItemName = FormatItemName(mod);
                             return order;
                         })
@@ -162,10 +163,10 @@ class Program
         return (orders, processedMods, modsWithNoOrders);
     }
 
-    // Method to print the list of orders sorted by platinum DESC as messages ready to paste into the ingame chat.
+    // Method to print the list of orders sorted by platinum ASC as messages ready to paste into the ingame chat.
     private static void PrintOrders(List<Order> orders, List<string> modsWithNoOrders)
     {
-        var sortedOrders = orders.OrderByDescending(order => order.Platinum).ToList();
+        var sortedOrders = orders.OrderBy(order => order.Platinum).ToList();
 
         if (orders.Count > 0)
         {
@@ -236,7 +237,7 @@ class Program
             {
                 writer.WriteLine($"ORDERS FOUND ({orders.Count} total):");
                 writer.WriteLine($"========================================");
-                var sortedOrders = orders.OrderByDescending(order => order.Platinum).ToList();
+                var sortedOrders = orders.OrderBy(order => order.Platinum).ToList();
                 
                 // Group orders by item to show market links
                 var groupedOrders = sortedOrders.GroupBy(o => o.ItemId).ToList();
