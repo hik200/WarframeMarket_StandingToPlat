@@ -20,6 +20,7 @@ namespace WarframeMarket_StandingToPlat
         private List<string> currentProcessedMods = new();
         private List<string> currentModsWithNoOrders = new();
         private string selectedSyndicateName = "";
+        private string lastScanFilePath = "";
 
         public MainWindow()
         {
@@ -105,6 +106,9 @@ namespace WarframeMarket_StandingToPlat
                 currentOrders = orders;
                 currentProcessedMods = processedMods;
                 currentModsWithNoOrders = modsWithNoOrders;
+
+                // Save the scan data for later retrieval
+                SaveLastScanData();
 
                 DisplayResults();
                 ExportButton.IsEnabled = true;
@@ -449,6 +453,190 @@ namespace WarframeMarket_StandingToPlat
         private string GetWarframeMarketUrl(string itemId)
         {
             return $"https://warframe.market/items/{itemId.Trim()}";
+        }
+
+        // Method to save the last scan data to a JSON file per syndicate
+        private void SaveLastScanData()
+        {
+            try
+            {
+                var scanData = new
+                {
+                    SyndicateName = selectedSyndicateName,
+                    ScanDate = DateTime.Now,
+                    Orders = currentOrders.Select(o => new
+                    {
+                        o.Id,
+                        o.Type,
+                        o.Platinum,
+                        o.Quantity,
+                        o.Rank,
+                        o.Visible,
+                        o.CreatedAt,
+                        o.UpdatedAt,
+                        o.ItemId,
+                        o.ItemName,
+                        User = new { o.User.IngameName, o.User.Status }
+                    }).ToList(),
+                    ProcessedMods = currentProcessedMods,
+                    ModsWithNoOrders = currentModsWithNoOrders
+                };
+
+                var lastScanFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LastScans");
+                if (!Directory.Exists(lastScanFolder))
+                {
+                    Directory.CreateDirectory(lastScanFolder);
+                }
+
+                // Create filename based on syndicate name (replace spaces with underscores)
+                var safeSyndicateName = selectedSyndicateName.Replace(" ", "_").Replace(":", "").Replace("/", "");
+                lastScanFilePath = Path.Combine(lastScanFolder, $"{safeSyndicateName}_last_scan.json");
+                var json = System.Text.Json.JsonSerializer.Serialize(scanData, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(lastScanFilePath, json);
+
+                StatusText.Text += $"\n💾 {selectedSyndicateName} scan data saved to: {Path.GetFileName(lastScanFilePath)}";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text += $"\n⚠️ Failed to save scan data: {ex.Message}";
+            }
+        }
+
+        // Method to load old scan data
+        private void LoadOldDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var lastScanFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LastScans");
+                
+                if (!Directory.Exists(lastScanFolder))
+                {
+                    MessageBox.Show("No previous scan data found.\n\nPlease run a scan first to save data.", 
+                                  "No Data Found", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Get all saved scan files
+                var scanFiles = Directory.GetFiles(lastScanFolder, "*_last_scan.json");
+                
+                if (scanFiles.Length == 0)
+                {
+                    MessageBox.Show("No previous scan data found.\n\nPlease run a scan first to save data.", 
+                                  "No Data Found", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // If only one file, load it directly
+                if (scanFiles.Length == 1)
+                {
+                    LoadScanFromFile(scanFiles[0]);
+                    return;
+                }
+
+                // Show selection dialog for multiple files
+                var fileNames = scanFiles.Select(f => Path.GetFileNameWithoutExtension(f).Replace("_last_scan", "")).ToList();
+                var selectionDialog = new SyndicateSelectionDialog(fileNames);
+                
+                if (selectionDialog.ShowDialog() == true)
+                {
+                    var selectedFile = scanFiles[selectionDialog.SelectedIndex];
+                    LoadScanFromFile(selectedFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading old data: {ex.Message}", 
+                              "Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = $"Error loading old data: {ex.Message}";
+            }
+        }
+
+        // Helper method to load scan data from a specific file
+        private void LoadScanFromFile(string filePath)
+        {
+            try
+            {
+                var json = File.ReadAllText(filePath);
+                var jsonDoc = System.Text.Json.JsonDocument.Parse(json);
+                var root = jsonDoc.RootElement;
+
+                // Clear current data
+                currentOrders.Clear();
+                currentProcessedMods.Clear();
+                currentModsWithNoOrders.Clear();
+
+                // Load syndicate name
+                if (root.TryGetProperty("SyndicateName", out var syndicateNameElement))
+                {
+                    selectedSyndicateName = syndicateNameElement.GetString() ?? "";
+                }
+
+                // Load orders
+                if (root.TryGetProperty("Orders", out var ordersElement))
+                {
+                    foreach (var orderElement in ordersElement.EnumerateArray())
+                    {
+                        var order = new Order();
+                        if (orderElement.TryGetProperty("Id", out var idElement)) order.Id = idElement.GetString() ?? "";
+                        if (orderElement.TryGetProperty("Type", out var typeElement)) order.Type = typeElement.GetString() ?? "";
+                        if (orderElement.TryGetProperty("Platinum", out var platinumElement)) order.Platinum = platinumElement.GetInt32();
+                        if (orderElement.TryGetProperty("Quantity", out var quantityElement)) order.Quantity = quantityElement.GetInt32();
+                        if (orderElement.TryGetProperty("Rank", out var rankElement)) order.Rank = rankElement.GetInt32();
+                        if (orderElement.TryGetProperty("Visible", out var visibleElement)) order.Visible = visibleElement.GetBoolean();
+                        if (orderElement.TryGetProperty("ItemId", out var itemIdElement)) order.ItemId = itemIdElement.GetString() ?? "";
+                        if (orderElement.TryGetProperty("ItemName", out var itemNameElement)) order.ItemName = itemNameElement.GetString() ?? "";
+                        
+                        if (orderElement.TryGetProperty("User", out var userElement))
+                        {
+                            order.User = new User();
+                            if (userElement.TryGetProperty("IngameName", out var ingameNameElement)) order.User.IngameName = ingameNameElement.GetString() ?? "";
+                            if (userElement.TryGetProperty("Status", out var statusElement)) order.User.Status = statusElement.GetString() ?? "";
+                        }
+
+                        currentOrders.Add(order);
+                    }
+                }
+
+                // Load processed mods
+                if (root.TryGetProperty("ProcessedMods", out var processedModsElement))
+                {
+                    foreach (var modElement in processedModsElement.EnumerateArray())
+                    {
+                        currentProcessedMods.Add(modElement.GetString() ?? "");
+                    }
+                }
+
+                // Load mods with no orders
+                if (root.TryGetProperty("ModsWithNoOrders", out var modsWithNoOrdersElement))
+                {
+                    foreach (var modElement in modsWithNoOrdersElement.EnumerateArray())
+                    {
+                        currentModsWithNoOrders.Add(modElement.GetString() ?? "");
+                    }
+                }
+
+                // Display the loaded data
+                DisplayResults();
+                ExportButton.IsEnabled = true;
+
+                // Get scan date
+                var scanDate = "Unknown";
+                if (root.TryGetProperty("ScanDate", out var scanDateElement))
+                {
+                    if (DateTime.TryParse(scanDateElement.GetString(), out var date))
+                    {
+                        scanDate = date.ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                }
+
+                StatusText.Text = $"📂 Loaded old scan data from {scanDate}\nFound {currentOrders.Count} orders for {currentProcessedMods.Count} mods";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading old data: {ex.Message}", 
+                              "Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = $"Error loading old data: {ex.Message}";
+            }
         }
     }
 }

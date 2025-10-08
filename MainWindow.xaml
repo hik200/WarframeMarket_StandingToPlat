@@ -113,6 +113,34 @@
                         </Button.Style>
                     </Button>
                     
+                    <Button x:Name="LoadOldDataButton" Content="📂 Load Old Data" 
+                            Height="40" FontSize="13" FontWeight="SemiBold"
+                            Background="#FF9800" Foreground="White" BorderThickness="0"
+                            Margin="0,12,0,0" Click="LoadOldDataButton_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    CornerRadius="6" Padding="12,8">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#F57C00"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter Property="Background" Value="#E65100"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    
                     <!-- Status Section -->
                     <Border Background="#1a1a1a" CornerRadius="8" Padding="15" Margin="0,25,0,0">
                         <StackPanel>
