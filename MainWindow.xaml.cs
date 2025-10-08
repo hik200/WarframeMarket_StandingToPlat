@@ -205,7 +205,7 @@ namespace WarframeMarket_StandingToPlat
                     var firstOrder = group.First();
                     var marketUrl = GetWarframeMarketUrl(firstOrder.ItemId);
 
-                    // Create mod header
+                    // Create mod header - split layout (left: mod info, right: post order)
                     var modHeader = new Border
                     {
                         Background = new SolidColorBrush(Color.FromRgb(76, 175, 80)),
@@ -214,8 +214,14 @@ namespace WarframeMarket_StandingToPlat
                         Padding = new Thickness(15)
                     };
 
-                    var modStack = new StackPanel();
-                    modStack.Children.Add(new TextBlock
+                    // Create main grid for split layout
+                    var headerGrid = new Grid();
+                    headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Left side
+                    headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Right side
+
+                    // Left side - Mod name and link
+                    var leftStack = new StackPanel();
+                    leftStack.Children.Add(new TextBlock
                     {
                         Text = firstOrder.ItemName,
                         FontSize = 16,
@@ -239,8 +245,140 @@ namespace WarframeMarket_StandingToPlat
                         UseShellExecute = true
                     });
 
-                    modStack.Children.Add(linkButton);
-                    modHeader.Child = modStack;
+                    leftStack.Children.Add(linkButton);
+                    Grid.SetColumn(leftStack, 0);
+                    headerGrid.Children.Add(leftStack);
+
+                    // Right side - Post Order fields in columns
+                    var rightStack = new StackPanel();
+                    
+                    // Post Order header
+                    rightStack.Children.Add(new TextBlock
+                    {
+                        Text = "📝 Post Your Order",
+                        FontSize = 14,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        Margin = new Thickness(0, 0, 0, 8),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    });
+
+                    // Input fields in columns
+                    var inputGrid = new Grid();
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) }); // Label
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) }); // Input
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) }); // Label
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) }); // Input
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) }); // Label
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) }); // Input
+                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) }); // Button
+
+                    // Quantity
+                    var quantityLabel = new TextBlock
+                    {
+                        Text = "Qty:",
+                        FontSize = 11,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Margin = new Thickness(0, 0, 3, 0)
+                    };
+                    Grid.SetColumn(quantityLabel, 0);
+                    inputGrid.Children.Add(quantityLabel);
+
+                    var quantityTextBox = new TextBox
+                    {
+                        Text = "1",
+                        Height = 22,
+                        FontSize = 10,
+                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                        Foreground = Brushes.White,
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                        Padding = new Thickness(3, 2, 3, 2)
+                    };
+                    Grid.SetColumn(quantityTextBox, 1);
+                    inputGrid.Children.Add(quantityTextBox);
+
+                    // Cost
+                    var costLabel = new TextBlock
+                    {
+                        Text = "Cost:",
+                        FontSize = 11,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Margin = new Thickness(8, 0, 3, 0)
+                    };
+                    Grid.SetColumn(costLabel, 2);
+                    inputGrid.Children.Add(costLabel);
+
+                    var costTextBox = new TextBox
+                    {
+                        Text = group.OrderByDescending(o => o.Platinum).Last().Platinum.ToString(),
+                        Height = 22,
+                        FontSize = 10,
+                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                        Foreground = Brushes.White,
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                        Padding = new Thickness(3, 2, 3, 2)
+                    };
+                    Grid.SetColumn(costTextBox, 3);
+                    inputGrid.Children.Add(costTextBox);
+
+                    // Rank
+                    var rankLabel = new TextBlock
+                    {
+                        Text = "Rank:",
+                        FontSize = 11,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = Brushes.White,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Margin = new Thickness(8, 0, 3, 0)
+                    };
+                    Grid.SetColumn(rankLabel, 4);
+                    inputGrid.Children.Add(rankLabel);
+
+                    var rankTextBox = new TextBox
+                    {
+                        Text = "0",
+                        Height = 22,
+                        FontSize = 10,
+                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                        Foreground = Brushes.White,
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                        Padding = new Thickness(3, 2, 3, 2)
+                    };
+                    Grid.SetColumn(rankTextBox, 5);
+                    inputGrid.Children.Add(rankTextBox);
+
+                    // Post Order button
+                    var postOrderButton = new Button
+                    {
+                        Content = "📝 Post",
+                        Height = 22,
+                        FontSize = 10,
+                        FontWeight = FontWeights.Bold,
+                        Background = new SolidColorBrush(Color.FromRgb(33, 150, 243)),
+                        Foreground = Brushes.White,
+                        BorderThickness = new Thickness(0),
+                        Padding = new Thickness(6, 2, 6, 2),
+                        Margin = new Thickness(8, 0, 0, 0),
+                        Cursor = Cursors.Hand
+                    };
+                    Grid.SetColumn(postOrderButton, 6);
+                    inputGrid.Children.Add(postOrderButton);
+
+                    // Add click handler for the button
+                    postOrderButton.Click += (s, e) => PostOrderInline(firstOrder.ItemId, firstOrder.ItemName, quantityTextBox.Text, costTextBox.Text, rankTextBox.Text);
+
+                    rightStack.Children.Add(inputGrid);
+                    Grid.SetColumn(rightStack, 1);
+                    headerGrid.Children.Add(rightStack);
+
+                    modHeader.Child = headerGrid;
                     ResultsPanel.Children.Add(modHeader);
 
                     // Create orders list
@@ -279,135 +417,6 @@ namespace WarframeMarket_StandingToPlat
                         ResultsPanel.Children.Add(orderBorder);
                     }
 
-                    // Create Post Order section outside the green panel
-                    var postOrderBorder = new Border
-                    {
-                        Background = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
-                        CornerRadius = new CornerRadius(4),
-                        Margin = new Thickness(0, 10, 0, 15),
-                        Padding = new Thickness(15)
-                    };
-
-                    var postOrderStack = new StackPanel();
-                    
-                    // Post Order header
-                    postOrderStack.Children.Add(new TextBlock
-                    {
-                        Text = "📝 Post Your Order",
-                        FontSize = 14,
-                        FontWeight = FontWeights.Bold,
-                        Foreground = Brushes.White,
-                        Margin = new Thickness(0, 0, 0, 10)
-                    });
-
-                    // Input fields container
-                    var inputGrid = new Grid();
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
-                    inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
-
-                    // Quantity
-                    inputGrid.Children.Add(new TextBlock
-                    {
-                        Text = "Quantity:",
-                        FontSize = 12,
-                        FontWeight = FontWeights.Bold,
-                        Foreground = Brushes.White,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(0, 0, 5, 0)
-                    });
-                    Grid.SetColumn(inputGrid.Children[inputGrid.Children.Count - 1], 0);
-
-                    var quantityTextBox = new TextBox
-                    {
-                        Text = "1",
-                        Height = 25,
-                        FontSize = 11,
-                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
-                        Foreground = Brushes.White,
-                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
-                        Padding = new Thickness(5, 3, 5, 3)
-                    };
-                    Grid.SetColumn(quantityTextBox, 1);
-                    inputGrid.Children.Add(quantityTextBox);
-
-                    // Cost
-                    inputGrid.Children.Add(new TextBlock
-                    {
-                        Text = "Cost:",
-                        FontSize = 12,
-                        FontWeight = FontWeights.Bold,
-                        Foreground = Brushes.White,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(10, 0, 5, 0)
-                    });
-                    Grid.SetColumn(inputGrid.Children[inputGrid.Children.Count - 1], 2);
-
-                    var costTextBox = new TextBox
-                    {
-                        Text = group.OrderByDescending(o => o.Platinum).First().Platinum.ToString(),
-                        Height = 25,
-                        FontSize = 11,
-                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
-                        Foreground = Brushes.White,
-                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
-                        Padding = new Thickness(5, 3, 5, 3)
-                    };
-                    Grid.SetColumn(costTextBox, 3);
-                    inputGrid.Children.Add(costTextBox);
-
-                    // Rank
-                    inputGrid.Children.Add(new TextBlock
-                    {
-                        Text = "Rank:",
-                        FontSize = 12,
-                        FontWeight = FontWeights.Bold,
-                        Foreground = Brushes.White,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(10, 0, 5, 0)
-                    });
-                    Grid.SetColumn(inputGrid.Children[inputGrid.Children.Count - 1], 4);
-
-                    var rankTextBox = new TextBox
-                    {
-                        Text = "0",
-                        Height = 25,
-                        FontSize = 11,
-                        Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
-                        Foreground = Brushes.White,
-                        BorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
-                        Padding = new Thickness(5, 3, 5, 3)
-                    };
-                    Grid.SetColumn(rankTextBox, 5);
-                    inputGrid.Children.Add(rankTextBox);
-
-                    // Post Order button
-                    var postOrderButton = new Button
-                    {
-                        Content = "📝 Post Order",
-                        Height = 25,
-                        FontSize = 11,
-                        FontWeight = FontWeights.Bold,
-                        Background = new SolidColorBrush(Color.FromRgb(76, 175, 80)),
-                        Foreground = Brushes.White,
-                        BorderThickness = new Thickness(0),
-                        Padding = new Thickness(8, 2, 8, 2),
-                        Margin = new Thickness(10, 0, 0, 0),
-                        Cursor = Cursors.Hand
-                    };
-                    Grid.SetColumn(postOrderButton, 6);
-                    inputGrid.Children.Add(postOrderButton);
-
-                    // Add click handler for the button
-                    postOrderButton.Click += (s, e) => PostOrderInline(firstOrder.ItemId, firstOrder.ItemName, quantityTextBox.Text, costTextBox.Text, rankTextBox.Text);
-
-                    postOrderStack.Children.Add(inputGrid);
-                    postOrderBorder.Child = postOrderStack;
-                    ResultsPanel.Children.Add(postOrderBorder);
                 }
             }
             else
