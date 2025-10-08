@@ -28,6 +28,23 @@ namespace WarframeMarket_StandingToPlat
             LoadSyndicates();
         }
 
+        private void AuthorizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "https://api.warframe.market/v2/oauth/authorize",
+                    UseShellExecute = true
+                });
+                StatusText.Text = "Opening OAuth authorization in your browser...";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Failed to open OAuth page: {ex.Message}";
+            }
+        }
+
         private void LoadSyndicates()
         {
             try

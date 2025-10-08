@@ -15,6 +15,11 @@
         <!-- Header -->
         <Border Grid.Row="0" Background="#2d2d2d" Padding="20">
             <StackPanel>
+                <Button x:Name="AuthorizeButton" Content="🔐 Authorize (OAuth)"
+                        Height="32" FontSize="12" FontWeight="SemiBold"
+                        Background="#37474F" Foreground="White" BorderThickness="0"
+                        HorizontalAlignment="Right" Margin="0,0,0,8"
+                        Click="AuthorizeButton_Click"/>
                 <TextBlock Text="Warframe Market Standing to Plat" 
                           FontSize="24" FontWeight="Bold" 
                           Foreground="White" HorizontalAlignment="Center"/>
