@@ -223,6 +223,9 @@ namespace WarframeMarket_StandingToPlat
                         Foreground = Brushes.White
                     });
 
+                    // Create button container
+                    var buttonStack = new StackPanel { Orientation = Orientation.Horizontal };
+                    
                     var linkButton = new Button
                     {
                         Content = $"🔗 View on Warframe Market",
@@ -230,7 +233,7 @@ namespace WarframeMarket_StandingToPlat
                         Foreground = Brushes.White,
                         BorderThickness = new Thickness(0),
                         Padding = new Thickness(8, 4, 8, 4),
-                        Margin = new Thickness(0, 5, 0, 0),
+                        Margin = new Thickness(0, 5, 10, 0),
                         Cursor = Cursors.Hand
                     };
                     linkButton.Click += (s, e) => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -239,7 +242,21 @@ namespace WarframeMarket_StandingToPlat
                         UseShellExecute = true
                     });
 
-                    modStack.Children.Add(linkButton);
+                    var postOrderButton = new Button
+                    {
+                        Content = $"📝 Post Order",
+                        Background = new SolidColorBrush(Color.FromRgb(76, 175, 80)),
+                        Foreground = Brushes.White,
+                        BorderThickness = new Thickness(0),
+                        Padding = new Thickness(8, 4, 8, 4),
+                        Margin = new Thickness(0, 5, 0, 0),
+                        Cursor = Cursors.Hand
+                    };
+                    postOrderButton.Click += (s, e) => ShowPostOrderDialog(firstOrder.ItemId, firstOrder.ItemName, group.OrderByDescending(o => o.Platinum).First().Platinum);
+
+                    buttonStack.Children.Add(linkButton);
+                    buttonStack.Children.Add(postOrderButton);
+                    modStack.Children.Add(buttonStack);
                     modHeader.Child = modStack;
                     ResultsPanel.Children.Add(modHeader);
 
@@ -255,12 +272,16 @@ namespace WarframeMarket_StandingToPlat
                         };
 
                         var orderStack = new StackPanel();
-                        orderStack.Children.Add(new TextBlock
+                        orderStack.Children.Add(new TextBox
                         {
                             Text = $"/w {order.User.IngameName} Hi! I want to sell: \"{order.ItemName} (rank {order.Rank})\" for {order.Platinum} platinum. (warframe.market)",
                             Foreground = Brushes.White,
+                            Background = new SolidColorBrush(Color.FromRgb(61, 61, 61)),
+                            BorderThickness = new Thickness(0),
                             FontSize = 12,
-                            TextWrapping = TextWrapping.Wrap
+                            TextWrapping = TextWrapping.Wrap,
+                            IsReadOnly = true,
+                            IsReadOnlyCaretVisible = true
                         });
 
                         orderStack.Children.Add(new TextBlock
@@ -453,6 +474,14 @@ namespace WarframeMarket_StandingToPlat
         private string GetWarframeMarketUrl(string itemId)
         {
             return $"https://warframe.market/items/{itemId.Trim()}";
+        }
+
+        // Method to show the Post Order dialog
+        private void ShowPostOrderDialog(string itemId, string itemName, int defaultCost)
+        {
+            var dialog = new PostOrderDialog(itemId, itemName, defaultCost);
+            dialog.Owner = this;
+            dialog.ShowDialog();
         }
 
         // Method to save the last scan data to a JSON file per syndicate

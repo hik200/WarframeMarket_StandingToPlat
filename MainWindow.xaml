@@ -146,8 +146,10 @@
                         <StackPanel>
                             <TextBlock Text="📊 Status" FontSize="13" FontWeight="Bold" 
                                       Foreground="#ffffff" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="StatusText" Text="Ready" FontSize="12" 
-                                      Foreground="#b0b0b0" TextWrapping="Wrap" LineHeight="16"/>
+                            <TextBox x:Name="StatusText" Text="Ready" FontSize="12"
+                                     Foreground="#b0b0b0" Background="#1a1a1a" BorderThickness="0"
+                                     IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                                     TextWrapping="Wrap" AcceptsReturn="True"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
